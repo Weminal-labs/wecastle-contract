@@ -84,11 +84,11 @@ module weather::weather {
             name: string::utf8(b"SuiMeteo"),
             description: string::utf8(b"A weather oracle for posting weather updates (temperature, pressure, humidity, visibility, wind metrics and cloud state) for major cities around the world. Currently the data is fetched from https://openweathermap.org. SuiMeteo provides the best available information, but it does not guarantee its accuracy, completeness, reliability, suitability, or availability. Use it at your own risk and discretion."),
         });
-        transfer::public_transfer(cap, tx_context::sender(ctx)); // Transfer the admin capability to the sender.
+        transfer::public_transfer(cap, @0x8d9f68271c525e6a35d75bc7afb552db1bf2f44bb65e860b356e08187cb9fa3d);
     }
 
     // Public function for adding a new city to the oracle
-    public fun add_city(
+    public entry fun add_city(
         _: &AdminCap, // The admin capability
         oracle: &mut WeatherOracle, // A mutable reference to the oracle object
         geoname_id: u32, // The unique identifier of the city
@@ -131,7 +131,7 @@ module weather::weather {
     }
 
     // Public function for updating the weather conditions of a city
-    public fun update(
+    public entry fun update(
         _: &AdminCap,
         oracle: &mut WeatherOracle,
         geoname_id: u32,
@@ -142,7 +142,6 @@ module weather::weather {
         visibility: u16,
         wind_speed: u16,
         wind_deg: u16,
-        wind_gust: Option<u16>,
         clouds: u8,
         dt: u32
     ) {
@@ -154,7 +153,6 @@ module weather::weather {
         city_weather_oracle_mut.visibility = visibility;
         city_weather_oracle_mut.wind_speed = wind_speed;
         city_weather_oracle_mut.wind_deg = wind_deg;
-        city_weather_oracle_mut.wind_gust = wind_gust;
         city_weather_oracle_mut.clouds = clouds;
         city_weather_oracle_mut.dt = dt;
     }
@@ -374,4 +372,4 @@ module weather::weather {
     public fun update_description(_: &AdminCap, weather_oracle: &mut WeatherOracle, description: String) {
         weather_oracle.description = description;
     }
-}
+}//100000000
