@@ -88,7 +88,7 @@ module weather::weather {
     }
 
     // Public function for adding a new city to the oracle
-    public entry fun add_city(
+    public fun add_city(
         _: &AdminCap, // The admin capability
         oracle: &mut WeatherOracle, // A mutable reference to the oracle object
         geoname_id: u32, // The unique identifier of the city
@@ -131,7 +131,7 @@ module weather::weather {
     }
 
     // Public function for updating the weather conditions of a city
-    public entry fun update(
+    public fun update(
         _: &AdminCap,
         oracle: &mut WeatherOracle,
         geoname_id: u32,
