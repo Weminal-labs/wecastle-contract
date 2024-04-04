@@ -13,11 +13,13 @@ module weather::game {
         id: u32,
         city_name: String,
         country: String,
-        temp: u32,
-        humidity: u8,
-        visibility: u16,
+        temp: u32, 
+        visibility: u16, 
         wind_speed: u16,
-        cloud: u8
+        wind_deg: String, 
+        clouds: u8, 
+        is_rain: bool,
+        rain_fall: String
     }
 
     // fun init(ctx: &mut TxContext) {
@@ -38,11 +40,14 @@ module weather::game {
             city_name: weather_oracle::city_weather_oracle_name(city_weather, city_id),
             country: weather_oracle::city_weather_oracle_country(city_weather, city_id),
             temp: weather_oracle::city_weather_oracle_temp(city_weather, city_id),
-            humidity: weather_oracle::city_weather_oracle_humidity(city_weather, city_id),
             visibility: weather_oracle::city_weather_oracle_visibility(city_weather, city_id),
             wind_speed: weather_oracle::city_weather_oracle_wind_speed(city_weather, city_id),
-            cloud: weather_oracle::city_weather_oracle_clouds(city_weather, city_id)
+            wind_deg: weather_oracle::city_weather_oracle_wind_deg(city_weather, city_id),
+            clouds: weather_oracle::city_weather_oracle_clouds(city_weather, city_id),
+            is_rain: weather_oracle::city_weather_oracle_is_rain(city_weather, city_id),
+            rain_fall: weather_oracle::city_weather_oracle_rain_fall(city_weather, city_id),
         };
         event::emit(city_weather);
     }
 }
+
