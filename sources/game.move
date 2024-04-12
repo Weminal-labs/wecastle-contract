@@ -11,16 +11,20 @@ module game::game {
     use std::option::{Self, Option};
     use sui::dynamic_object_field as dof;
     use game::weather as weather_oracle;
-
+    use std::ascii;
     const NOT_ENOUGH_RESOURCES: u64 = 1;
     const MAX_LEVEL: u64 = 2;
     const NOT_A_CORBA_PLAYER: u64 = 3;
     const INVALID_HERO_TYPE: u64 = 4;
 
-
     const WARRIOR: u8 = 0;
     const ACHER: u8 = 1;
     const PAWN: u8 = 2;
+
+    const PLAYER_INIT_GOLD: u32 = 100;
+    const PLAYER_INIT_WOOD: u32 = 100;
+    const PLAYER_INIT_MEAT: u32 = 100;
+    const PLAYER_INIT_MAX_EXP: u32 = 5;
 
     const WARRIOR_GOLD: u32 = 10;
     const WARRIOR_MEAT: u32 = 10;
@@ -84,7 +88,8 @@ module game::game {
         location_x: u16,
         location_y: u16,
         name: String,
-        history: String
+        description: String,
+        url: Url
     }
 
     public struct NewHeroEvent has copy, drop {
@@ -92,8 +97,6 @@ module game::game {
         hero_id: ID,
         owner: address
     }
-
-
 
     public struct CityWeatherEvent has drop, copy  {
         id: u32,
@@ -130,12 +133,12 @@ module game::game {
         };
         let player:  CorbaPlayer = CorbaPlayer {
             id: object::new(ctx),
-            level: 0,
+            level: 1,
             exp: 0,
-            max_exp: 0,
-            gold: 0,
-            wood: 0,
-            meat: 0
+            max_exp: PLAYER_INIT_MAX_EXP,
+            gold: PLAYER_INIT_GOLD,
+            wood: PLAYER_INIT_WOOD,
+            meat: PLAYER_INIT_MEAT
         };
         dof::add(
             &mut corbaGameFi.id, 
@@ -181,6 +184,7 @@ module game::game {
         _max_exp: u16,
         _name: String,
         _history: String,
+        _url: Url,
         ctx: &mut TxContext 
     ): Hero {
         Hero {
@@ -196,7 +200,8 @@ module game::game {
             location_x: 0,
             location_y: 0,
             name: _name,
-            history: _history,
+            description: _history,
+            url: _url
         }
     }
 
@@ -208,7 +213,8 @@ module game::game {
         _exp: u16,
         _max_exp: u16,
         _name: String,
-        _history: String,
+        _description: String,
+        _url: ascii::String,
         corbaGameFi: &mut CorbaGameFi,
         ctx: &mut TxContext 
     ) {
@@ -258,7 +264,8 @@ module game::game {
             _exp,
             _max_exp,
             _name,
-            _history,
+            _description,
+            url::new_unsafe(_url),
             ctx
         );
         let copy_id = object::uid_to_inner(&new_hero.id);
@@ -364,7 +371,8 @@ module game::game {
         _exp: u16,
         _max_exp: u16,
         _name: String,
-        _history: String,
+        _description: String,
+        _url: vector<u8>,
         ctx: &mut TxContext 
     ): Hero {
         mint_hero(
@@ -375,7 +383,8 @@ module game::game {
             _exp,
             _max_exp,
             _name,
-            _history,
+            _description,
+            url::new_unsafe_from_bytes(_url),
             ctx
         )
     }
@@ -390,6 +399,7 @@ module game::hero_for_test {
     use sui::test_scenario as ts;
     use sui::transfer;
     use std::string;
+    use std::ascii;
     const WARRIOR: u8 = 0;
     const ACHER: u8 = 1;
     const PAWN: u8 = 2;
@@ -413,6 +423,7 @@ module game::hero_for_test {
                 10,
                 string::utf8(b"pawn pro"),
                 string::utf8(b"pawn"),
+                b"url",
                 ts::ctx(&mut scenario),
             );
             transfer::public_transfer(hero, add1);
@@ -465,3 +476,5 @@ module game::hero_for_test {
 
 //sponsered fun: new_herro, get_player_data, upadte_hero, update_player_resources, update_player_level
 //the rest funs ins normal call
+//opackage 0x73725f6b1262eb85047e735921fea7621be5ac3e149cf66dbe8988e4d0bf9aa8
+//suiver 0xe67586f62a2249e6b621cddae2c4a7088222801b0e54432dc26a2022054bea5a
