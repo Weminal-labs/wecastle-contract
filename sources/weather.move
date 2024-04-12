@@ -1,4 +1,4 @@
-module weather::weather{
+module game::weather{
     use std::option::{Self, Option};
     use std::string::{Self, String};
 
@@ -8,12 +8,12 @@ module weather::weather{
     use sui::transfer::{Self};
     use sui::tx_context::{Self, TxContext};
 
-    struct AdminCap has key, store { id: UID }
+    public struct AdminCap has key, store { id: UID }
 
-    struct WEATHER has drop {}
+    public struct WEATHER has drop {}
 
     // Define a struct for the weather oracle
-    struct WeatherOracle has key {
+    public struct WeatherOracle has key {
         id: UID,
         address: address,
         name: String,
@@ -21,7 +21,7 @@ module weather::weather{
     }
 
 
-     struct CityWeatherOracle has key, store {
+     public struct CityWeatherOracle has key, store {
         id: UID,
         geoname_id: u32, 
         name: String, 
@@ -37,7 +37,7 @@ module weather::weather{
         rain_fall: String
     }
 
-    struct WeatherNFT has key, store {
+    public struct WeatherNFT has key, store {
         id: UID,
         geoname_id: u32, 
         name: String, 
