@@ -9,34 +9,44 @@ module game::game {
     use sui::sui::SUI;
     use sui::coin::{Self, Coin};
     use std::option::{Self, Option};
+    use sui::package;
     use sui::dynamic_object_field as dof;
     use game::weather as weather_oracle;
     use std::ascii;
+    // use sui::transfer_policy::{
+    //         Self as policy,
+    //         TransferPolicy,
+    //         TransferPolicyCap,
+    //         TransferRequest
+    //     };
+    use game::witness_rule;
+    use game::royalty_rule;
+    use game::kiosk_lock_rule;
     const NOT_ENOUGH_RESOURCES: u64 = 1;
     const MAX_LEVEL: u64 = 2;
     const NOT_A_CORBA_PLAYER: u64 = 3;
     const INVALID_HERO_TYPE: u64 = 4;
 
-    const WARRIOR: u8 = 0;
-    const ACHER: u8 = 1;
-    const PAWN: u8 = 2;
+    const WARRIOR: u16 = 0;
+    const ACHER: u16 = 1;
+    const PAWN: u16 = 2;
 
     const PLAYER_INIT_GOLD: u32 = 100;
     const PLAYER_INIT_WOOD: u32 = 100;
     const PLAYER_INIT_MEAT: u32 = 100;
     const PLAYER_INIT_MAX_EXP: u32 = 5;
 
-    const WARRIOR_GOLD: u32 = 10;
-    const WARRIOR_MEAT: u32 = 10;
-    const WARRIOR_WOOD: u32 = 10;
+    const WARRIOR_MEAT: u32 = 40;
+    const WARRIOR_WOOD: u32 =15;
+    const WARRIOR_GOLD: u32 = 20;
 
-    const ACHER_GOLD: u32 = 10;
-    const ACHER_WOOD: u32 = 10;
-    const ACHER_MEAT: u32 = 10;
+    const ACHER_MEAT: u32 = 30;
+    const ACHER_WOOD: u32 = 30;
+    const ACHER_GOLD: u32 = 30;
 
-    const PAWN_GOLD: u32 = 10;
-    const PAWN_MEAT: u32 = 10;
-    const PAWN_WOOD: u32 = 10;
+    const PAWN_MEAT: u32 = 20;
+    const PAWN_WOOD: u32 = 20;
+    const PAWN_GOLD: u32 = 15;
 
     //admin 
     public struct AdminCap has key, store {
@@ -77,11 +87,11 @@ module game::game {
 
     public struct Hero has key, store {
         id: UID,
-        type_hero: u8,
-        health: u8,
-        max_health: u8, 
-        damage: u8,
-        speed: u8,
+        type_hero: u16,
+        health: u16,
+        max_health: u16, 
+        damage: u16,
+        speed: u16,
         level: u16,
         exp: u16,
         max_exp: u16,
@@ -110,9 +120,19 @@ module game::game {
         is_rain: bool,
         rain_fall: String
     }
+    public struct GAME has drop {}
+    public struct Rule has drop {}
 
-    fun init(ctx: &mut TxContext) 
+    fun init(otw: GAME, ctx: &mut TxContext) 
     {
+        //hero policy
+        let publisher = package::claim<GAME>(otw, ctx);
+        // let (mut transfer_policy, cap) : (policy::TransferPolicy<Hero>, policy::TransferPolicyCap<Hero>) = policy::new<Hero>(&publisher, ctx);
+        // royalty_rule::add<Hero>(&mut transfer_policy, &cap, 1000, 1000000);
+        // royalty_rule::pay<Hero>(&mut transfer_policy, &cap, 1000, 1000000);
+        // witness_rule::add<Hero, Rule>(&mut transfer_policy, &cap);
+        //policy::new_request<Hero>(item: object::ID, paid: u64, from: object::ID): transfer_policy::TransferRequest<T>
+
         let admin_cap = AdminCap {
             id: object::new(ctx)
         };
@@ -121,7 +141,10 @@ module game::game {
             version: string::utf8(b"1.0"),
             description: string::utf8(b"Corba game")
         });
+        // dof::add(&mut game_pool.id, string::utf8(b"transfer_policy"), transfer_policy);
+        // dof::add(&mut game_pool.id, string::utf8(b"transfer_policy_cap"), cap);
         transfer::public_transfer(admin_cap, @0x8d9f68271c525e6a35d75bc7afb552db1bf2f44bb65e860b356e08187cb9fa3d);
+        transfer::public_transfer(publisher, @0x8d9f68271c525e6a35d75bc7afb552db1bf2f44bb65e860b356e08187cb9fa3d);
     }
 
     public fun new_player(
@@ -140,6 +163,15 @@ module game::game {
             wood: PLAYER_INIT_WOOD,
             meat: PLAYER_INIT_MEAT
         };
+        event::emit(LoadPlayerEvent {
+            id: object::uid_to_inner(&player.id),
+            level: 1,
+            exp: 0,
+            max_exp: PLAYER_INIT_MAX_EXP,
+            gold: PLAYER_INIT_GOLD,
+            wood: PLAYER_INIT_WOOD,
+            meat: PLAYER_INIT_MEAT
+        });
         dof::add(
             &mut corbaGameFi.id, 
             object::id_from_address(tx_context::sender(ctx)), 
@@ -176,10 +208,10 @@ module game::game {
     }
 
     public fun mint_hero(
-        _type_hero: u8,
-        _max_health: u8, 
-        _damage: u8,
-        _speed: u8,
+        _type_hero: u16,
+        _max_health: u16, 
+        _damage: u16,
+        _speed: u16,
         _exp: u16,
         _max_exp: u16,
         _name: String,
@@ -206,10 +238,10 @@ module game::game {
     }
 
     public entry fun new_herro(
-        _type_hero: u8,
-        _max_health: u8, 
-        _damage: u8,
-        _speed: u8,
+        _type_hero: u16,
+        _max_health: u16, 
+        _damage: u16,
+        _speed: u16,
         _exp: u16,
         _max_exp: u16,
         _name: String,
@@ -270,6 +302,11 @@ module game::game {
         );
         let copy_id = object::uid_to_inner(&new_hero.id);
         transfer::public_transfer(new_hero, tx_context::sender(ctx));
+        // let mut transfer_policy = dof::borrow_mut(&mut corbaGameFi.id, string::utf8(b"transfer_policy"));
+        // let mut request = policy::new_request<Hero>(copy_id, 1000000000, object::id_from_address(tx_context::sender(ctx)));
+        // witness_rule::prove<Hero, Rule>(Rule{}, transfer_policy, &mut request);
+        // transfer::public_transfer(request, tx_context::sender(ctx));
+
         event::emit(NewHeroEvent {
             id: copy_id,
             hero_id: copy_id,
@@ -280,10 +317,10 @@ module game::game {
     public entry fun update_hero(
         _location_x: u16,
         _location_y: u16,
-        _health: u8,
-        _max_health: u8, 
-        _damage: u8,
-        _speed: u8,
+        _health: u16,
+        _max_health: u16, 
+        _damage: u16,
+        _speed: u16,
         _level: u16,
         _exp: u16,
         _max_exp: u16,
@@ -364,15 +401,15 @@ module game::game {
     
     #[test_only]
     public fun mint_hero_for_test(
-        _type_hero: u8,
-        _max_health: u8, 
-        _damage: u8,
-        _speed: u8,
+        _type_hero: u16,
+        _max_health: u16, 
+        _damage: u16,
+        _speed: u16,
         _exp: u16,
         _max_exp: u16,
         _name: String,
         _description: String,
-        _url: vector<u8>,
+        _url: vector<u16>,
         ctx: &mut TxContext 
     ): Hero {
         mint_hero(
@@ -400,9 +437,9 @@ module game::hero_for_test {
     use sui::transfer;
     use std::string;
     use std::ascii;
-    const WARRIOR: u8 = 0;
-    const ACHER: u8 = 1;
-    const PAWN: u8 = 2;
+    const WARRIOR: u16 = 0;
+    const ACHER: u16 = 1;
+    const PAWN: u16 = 2;
     const LEVEL_NOT_VALID: u64 = 5;
 
 

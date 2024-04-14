@@ -20,6 +20,7 @@ Sui = { git = "https://github.com/MystenLabs/sui.git", subdir = "crates/sui-fram
 
 [addresses]
 game = "0x0"
+policy = "0x9af35b57be4572094329c310f4cce3dce6a1bec2d5a01592d7063fd6906c5249"
 
 # Named addresses will be accessible in Move as `@name`. They're also exported:
 # for example, `std = "0x1"` is exported by the Standard Library.

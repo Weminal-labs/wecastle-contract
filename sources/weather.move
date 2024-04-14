@@ -8,6 +8,7 @@ module game::weather{
     use sui::transfer::{Self};
     use sui::tx_context::{Self, TxContext};
 
+
     public struct AdminCap has key, store { id: UID }
 
     public struct WEATHER has drop {}

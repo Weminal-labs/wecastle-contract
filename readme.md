@@ -1,2 +1,6 @@
-package id: 0x4499aaf5a0f6ad6286157c4ebcf8e64ffe123b7e17c0b4e584b2c2f6cce3383d
-weather oracle id: 0x18ebdc8e103e5ee0ff3844180c75c7dce96ae26751fd94c9f8fdf8e363a85e05
+# Game contract
+## Module game
+This module implement game logic
+All player info in game is stored as a CorbaPlayer and store in a dynamic object field of CorbaGame object
+## Module weather
+This module implement oracle, get weather from real life
