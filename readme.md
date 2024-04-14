@@ -7,3 +7,5 @@ This module implement oracle, get weather from real life
 
 ## Docs
 [Real-Time Weather Data with the Sui Weather Oracle](https://blog.sui.io/sui-weather-oracle/)
+
+[Sui framework](https://github.com/MystenLabs/sui/tree/main/crates/sui-framework/packages/sui-framework/sources)
